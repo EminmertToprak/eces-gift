@@ -1,0 +1,149 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    overflow-x: hidden; /* Disable horizontal scrollbar for the entire page */
+    scroll-behavior: smooth; /* Enable smooth scrolling */
+    background-color: #eedbe7;
+}
+
+@font-face {
+    font-family: customfont;
+    src: url(./fonts/MonsieurLaDoulaise-Regular.ttf);
+}
+
+
+h1 {
+    font-family: customfont;
+    font-size: 68px;
+    position: relative;
+    justify-self: center;
+    width: 100%;
+    text-align: center;
+    font-weight: lighter;
+    color: #00a3e1;
+    text-shadow: 0 0 2px #b2ceff, 0 0 3px white;
+}
+
+
+.timeline {
+    display: flex;
+    white-space: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    height: 70vh;
+    overflow-x: auto;
+    padding: 0;
+    margin: 0 20px 0 20px;
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+}
+
+.timeline::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome, Safari, and Opera */
+}
+
+.timeline-event {
+    position: relative;
+    cursor: pointer;
+    margin-right: 20px;
+    font-size: 100px;
+    transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+.timeline-event img{
+    cursor: pointer;
+    width: 500px;
+    height: auto;
+    filter: brightness(100%);
+    border: 1px solid #8da751;
+    border-radius: 10%;
+}
+
+.timeline-event:hover img{
+    filter: blur(8px);
+    filter: brightness(70%) blur(5px); /* Decrease brightness and add blur on hover */
+    opacity: 0.8; /* Decrease opacity on hover */
+}
+
+.timeline-event .event-title {
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    padding: 8px; /* Padding for better visibility */
+    width: 100%; /* Full width */
+    -webkit-text-stroke-width: 0.5px; 
+    -webkit-text-stroke-color: black; 
+}
+
+.timeline-event .event-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: black;
+    font-size: 20px;
+    text-align: center;
+    opacity: 0; /* Initially hidden */
+    transition: opacity 0.3s ease;
+    white-space: pre-line; /* Preserve line breaks in the rendered text */
+    max-width: 100%; /* Adjust the maximum width as needed */
+    font-style: italic;
+    font-weight: bold;
+}
+
+.timeline-event:hover .event-text {
+    opacity: 1; /* Visible on hover */
+}
+
+#event-description {
+    white-space: pre-line; /* Preserve line breaks in the rendered text */
+}
+
+.photo-album {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.photo-album img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.album-image {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    margin: auto;
+}
+
+#back-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    display: block; /* Ensure the button is displayed as a block element */
+}
+
+.heart {
+    color: red;
+    font-size: larger;
+}
+
+footer p{
+    margin-bottom: 5px;
+    margin-top: 0px;
+    text-align: center;
+}
