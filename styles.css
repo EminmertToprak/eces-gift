@@ -4,7 +4,7 @@ body {
     font-family: 'Arial', sans-serif;
     overflow-x: hidden; /* Disable horizontal scrollbar for the entire page */
     scroll-behavior: smooth; /* Enable smooth scrolling */
-    background-color: #eedbe7;
+    background-color: #efb7ba;
 }
 
 @font-face {
@@ -19,15 +19,18 @@ h1 {
     position: relative;
     justify-self: center;
     width: 100%;
+    margin-top: 0;
+    margin-bottom: 100px;
     text-align: center;
-    font-weight: lighter;
-    color: #00a3e1;
+    font-weight: bold;
+    color: #194f92;
     text-shadow: 0 0 2px #b2ceff, 0 0 3px white;
 }
 
 
 .timeline {
     display: flex;
+    flex-direction: row;
     white-space: nowrap;
     align-items: center;
     justify-content: flex-start;
@@ -56,7 +59,7 @@ h1 {
     width: 500px;
     height: auto;
     filter: brightness(100%);
-    border: 1px solid #8da751;
+    border: 1px solid #cbd5f0;
     border-radius: 10%;
 }
 
@@ -71,14 +74,15 @@ h1 {
     bottom: 10%;
     left: 50%;
     transform: translateX(-50%);
-    color: white;
-    font-size: 24px;
-    font-weight: bold;
+    font-family: cursive;
+    color: #fafafb;
+    font-size: 32px;
+    font-weight: light;
     text-align: center;
     padding: 8px; /* Padding for better visibility */
     width: 100%; /* Full width */
     -webkit-text-stroke-width: 0.5px; 
-    -webkit-text-stroke-color: black; 
+    -webkit-text-stroke-color: 194f92; 
 }
 
 .timeline-event .event-text {
@@ -86,7 +90,8 @@ h1 {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: black;
+    font-family: Garamond;
+    color: #fafafb;
     font-size: 20px;
     text-align: center;
     opacity: 0; /* Initially hidden */
@@ -106,11 +111,11 @@ h1 {
 }
 
 .photo-album {
+    display: none;
     flex-direction: row;
     flex-wrap: wrap ;
     justify-content: center;
     align-items: center;
-    height: 100vh;
 }
 
 .photo-album button {
@@ -118,10 +123,11 @@ h1 {
 }
 
 .photo-album img {
-    height: 400px;
+    max-height: 400px;
     width: auto;
+    margin: 10px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px #cbd5f0;
     filter: grayscale(100%);
 }
 
@@ -136,17 +142,6 @@ h1 {
     margin: auto;
 }
 
-#back-to-timeline-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-bottom: 10px;
-    display: block; /* Ensure the button is displayed as a block element */
-}
-
 .heart {
     color: red;
     font-size: larger;
@@ -156,4 +151,65 @@ footer p{
     margin-bottom: 5px;
     margin-top: 0px;
     text-align: center;
+    color: #194f92;
+}
+
+#back-button {
+    position: absolute;
+    top: 120px;
+    left: 10px;
+    align-items: center;
+    background-color: #fee6e3;
+    border: 2px solid #111;
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: #111;
+    cursor: pointer;
+    display: flex;
+    font-family: Inter,sans-serif;
+    font-size: 16px;
+    height: 48px;
+    justify-content: center;
+    line-height: 24px;
+    max-width: 100%;
+    padding: 0 25px;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+#back-button:after {
+  background-color: #111;
+  border-radius: 8px;
+  content: "";
+  display: block;
+  height: 48px;
+  left: 0;
+  width: 100%;
+  position: absolute;
+  top: -2px;
+  transform: translate(8px, 8px);
+  transition: transform .2s ease-out;
+  z-index: -1;
+}
+
+#back-button:hover:after {
+  transform: translate(0, 0);
+}
+
+#back-button:active {
+  background-color: #ffdeda;
+  outline: 0;
+}
+
+#back-button:hover {
+  outline: 0;
+}
+
+@media (min-width: 768px) {
+  #back-button {
+    padding: 0 40px;
+  }
 }

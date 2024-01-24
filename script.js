@@ -1,121 +1,144 @@
 document.addEventListener('DOMContentLoaded', function () {
+	console.log('Script is running after DOMContentLoaded.');
+
 	const timeline = document.getElementById('timeline');
 	const eventDescription = document.getElementById('event-description');
+	const backButton = document.getElementById('back-button');
 	const photoAlbum = document.getElementById('photo-album');
-	const backToTimelineButton = document.createElement('button');
-	backToTimelineButton.id = 'back-to-timeline-button';
-	backToTimelineButton.textContent = 'Back to Timeline';
 
-	backToTimelineButton.addEventListener('click', function () {
-		timeline.style.display = 'flex';
-		eventDescription.style.display = 'none';
-		photoAlbum.style.display = 'none';
-		backToTimelineButton.style.display = 'none';
-	});
+	console.log('Timeline:', timeline);
+	console.log('Event Description:', eventDescription);
+	console.log('Back Button:', backButton);
+	console.log('Photo Album:', photoAlbum);
 
-	photoAlbum.style.display = 'none';
+	// Add a global event listener for mousewheel to disable default scrolling
+	document.addEventListener('wheel', function (e) {
+		// Check if the mouse wheel event occurred over the timeline
+		const isTimeline = e.target.closest('#timeline');
 
-	document.addEventListener('wheel', function (event) {
-		const scrollSpeed = 2;
+		if (isTimeline) {
+			// Disable default top-to-bottom scrolling
+			e.preventDefault();
 
-		if (event.target.id !== 'photo-album') {
-			timeline.scrollLeft += event.deltaY * scrollSpeed;
-			event.preventDefault();
-		} else {
-			photoAlbum.scrollLeft += event.deltaY * scrollSpeed;
-			event.preventDefault();
+			// Adjust the timeline's scrollLeft property based on the direction of the scroll
+			timeline.scrollLeft += e.deltaY;
 		}
 	});
 
-	const events = [
-		{
-			title: 'Baby Lamb',
-			image: './images/baby_sheep.jpg',
-			images: [
-				'./images/baby_sheep/baby_1.jpg',
-				'./images/baby_sheep/baby_2.jpg',
-				'./images/baby_sheep/baby_3.jpg',
-				'./images/baby_sheep/baby_4.jpg',
-			],
-			text: 'In this world, a lamb did appear,\nTiny feet strong, no need to fear.\nChildhood sweet, like strawberries dear,\nAn adorable journey, drawing near.',
-		},
-		{
-			title: 'Child Lamb',
-			image: './images/child_sheep.jpg',
-			images: [
-				'./images/child_sheep/child_1.jpg',
-				'./images/child_sheep/child_2.jpg',
-			],
-			text: 'In a cradle of joy, a lamb so sweet,\nTiny hooves dancing to a playful beat.\nCurious eyes, exploring each street,\nA fluffy adventurer, in places to meet.',
-		},
-		{
-			title: 'School Lamb',
-			image: './images/teenage_sheep.jpg',
-			images: ['image1.jpg', 'image2.jpg'],
-			text: "School years unfold, my lamb in stride,\nIn Dad's shadow, a comforting guide.\nFamily ties strong, love as our pride,\nHumor, sharing, success side by side.",
-		},
-		{
-			title: 'Dutch Lamb',
-			image: './images/dutch_sheep.jpg',
-			images: ['image1.jpg', 'image2.jpg'],
-			text: "Guided by winds in Holland's embrace,\nSuccess in business, smiles light up the face.\nLove and career, a harmonious trace,\nA new chapter written in life's warm embrace.",
-		},
-		{
-			title: 'Married Lamb',
-			image: './images/married_sheep.jpg',
-			images: ['image1.jpg', 'image2.jpg'],
-			text: "Sloth watches, a friend keeping calm,\nMaster of laughter, chores in love's warm.\nA fairytale marriage, time won't harm,\nEvery moment adds value, love is our charm.",
-		},
-	];
+	// Function to fetch events from the server
+	async function fetchEvents() {
+		const response = await fetch('http://localhost:3000/events');
+		const events = await response.json();
+		renderTimeline(events);
+	}
 
-	events.forEach((event) => {
-		const eventElement = document.createElement('div');
-		eventElement.classList.add('timeline-event');
+	// Function to render the timeline based on events
+	function renderTimeline(events) {
+		// Clear existing timeline content
+		timeline.innerHTML = '';
 
-		const imgElement = document.createElement('img');
-		imgElement.src = event.image;
-		imgElement.alt = event.title;
-		eventElement.appendChild(imgElement);
+		// Dynamically create timeline events
+		events.forEach((event) => {
+			const eventElement = document.createElement('div');
+			eventElement.classList.add('timeline-event');
 
-		const titleElement = document.createElement('div');
-		titleElement.classList.add('event-title');
-		titleElement.textContent = event.title;
-		eventElement.appendChild(titleElement);
+			// Check if the event has a cover image before accessing it
+			const coverImagePath = event.cover || '/uploads/covers/default_cover.jpg';
 
-		if (event.text) {
-			const textElement = document.createElement('div');
-			textElement.classList.add('event-text');
-			textElement.textContent = event.text;
-			eventElement.appendChild(textElement);
-		}
+			// Create an img element for the event cover
+			const imgElement = document.createElement('img');
+			imgElement.src = coverImagePath;
+			imgElement.alt = event.title;
+			eventElement.appendChild(imgElement);
 
-		eventElement.addEventListener('click', function () {
-			timeline.style.display = 'none';
-			eventDescription.style.display = 'block';
-			showEventDescription(event);
-			photoAlbum.appendChild(backToTimelineButton);
+			// Create a title element for the event
+			const titleElement = document.createElement('div');
+			titleElement.classList.add('event-title');
+			titleElement.textContent = event.title;
+			eventElement.appendChild(titleElement);
+
+			// Create a text element for the event (visible on hover)
+			if (event.text) {
+				const textElement = document.createElement('div');
+				textElement.classList.add('event-text');
+				textElement.textContent = event.text;
+				eventElement.appendChild(textElement);
+			}
+
+			// Handle the click event
+			eventElement.addEventListener('click', function () {
+				// Show the timeline and hide the event description
+				timeline.style.display = 'none';
+				eventDescription.style.display = 'block';
+				showEventDescription(event);
+
+				// Show the photo album
+				photoAlbum.style.display = 'flex';
+
+				// Append the button to the visible photo album
+				const visiblePhotoAlbum = document.querySelector('.photo-album');
+				if (
+					visiblePhotoAlbum &&
+					window.getComputedStyle(visiblePhotoAlbum).display === 'flex'
+				) {
+					// Remove existing back buttons
+					document.querySelectorAll('#back-button').forEach((button) => {
+						button.remove();
+					});
+
+					// Create a new back button
+					const backButtonCopy = document.createElement('button');
+					backButtonCopy.id = 'back-button';
+					backButtonCopy.textContent = 'Back to Timeline';
+
+					// Insert the button as the first child of the visible photo album
+					visiblePhotoAlbum.insertAdjacentElement('afterbegin', backButtonCopy);
+				}
+			});
+
+			// Append the event to the timeline
+			timeline.appendChild(eventElement);
 		});
+	}
 
-		timeline.appendChild(eventElement);
-	});
-
+	// Function to show event description
 	function showEventDescription(event) {
-		// Clear previous content in the photo-album div
 		const photoAlbum = document.getElementById('photo-album');
+
+		// Clear existing content in the photo album
 		photoAlbum.innerHTML = '';
 
-		const albumImages = event.images || [];
-		albumImages.forEach((imageSrc) => {
+		// Populate the photo album with images from the selected event
+		event.images.forEach((image) => {
 			const imgElement = document.createElement('img');
-			imgElement.src = imageSrc;
-			imgElement.alt = event.title + ' Album Image';
-			imgElement.classList.add('album-image');
+			imgElement.src = image.path;
+			imgElement.alt = image.alt;
 			photoAlbum.appendChild(imgElement);
 		});
-
-		timeline.style.display = 'none';
-		eventDescription.style.display = 'none';
-		photoAlbum.style.display = 'flex';
-		backToTimelineButton.style.display = 'block';
 	}
+
+	// Add an event listener for clicks on the document
+	document.addEventListener('click', function (e) {
+		if (e.target.matches('#back-button')) {
+			// Handle the click event for the back button
+			// Show the timeline and hide the event description
+			timeline.style.display = 'flex';
+			eventDescription.style.display = 'none';
+			photoAlbum.style.display = 'none';
+			console.log('back button clicked');
+
+			// Remove the back button from the visible photo album
+			const visiblePhotoAlbum = document.querySelector('.photo-album');
+			if (
+				visiblePhotoAlbum &&
+				window.getComputedStyle(visiblePhotoAlbum).display === 'flex'
+			) {
+				// The photo album is visible
+				// Your existing logic for handling the back button
+			}
+		}
+	});
+
+	// Fetch events when the page loads
+	fetchEvents();
 });
