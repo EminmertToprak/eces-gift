@@ -41,8 +41,11 @@ document.addEventListener('DOMContentLoaded', function () {
 		},
 		{
 			title: 'Child Lamb',
-			image: './images/young_sheep.jpg',
-			images: ['image1.jpg', 'image2.jpg'],
+			image: './images/child_sheep.jpg',
+			images: [
+				'./images/child_sheep/child_1.jpg',
+				'./images/child_sheep/child_2.jpg',
+			],
 			text: 'In a cradle of joy, a lamb so sweet,\nTiny hooves dancing to a playful beat.\nCurious eyes, exploring each street,\nA fluffy adventurer, in places to meet.',
 		},
 		{
@@ -97,6 +100,10 @@ document.addEventListener('DOMContentLoaded', function () {
 	});
 
 	function showEventDescription(event) {
+		// Clear previous content in the photo-album div
+		const photoAlbum = document.getElementById('photo-album');
+		photoAlbum.innerHTML = '';
+
 		const albumImages = event.images || [];
 		albumImages.forEach((imageSrc) => {
 			const imgElement = document.createElement('img');
