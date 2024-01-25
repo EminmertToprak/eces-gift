@@ -3,28 +3,62 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	const timeline = document.getElementById('timeline');
 	const eventDescription = document.getElementById('event-description');
-	const backButton = document.getElementById('back-button');
 	const photoAlbum = document.getElementById('photo-album');
+	const events = document.querySelectorAll('.timeline-event');
 
-	console.log('Timeline:', timeline);
-	console.log('Event Description:', eventDescription);
-	console.log('Back Button:', backButton);
-	console.log('Photo Album:', photoAlbum);
+	// Function to smoothly scroll the timeline
+	function smoothScrollTo(target, duration) {
+		const start = timeline.scrollLeft;
+		const distance = target - start;
+		const startTime = performance.now();
+
+		function scrollAnimation(currentTime) {
+			const elapsedTime = currentTime - startTime;
+			const scrollAmount = easeInOutQuad(
+				elapsedTime,
+				start,
+				distance,
+				duration
+			);
+			timeline.scrollLeft = scrollAmount;
+			if (elapsedTime < duration) {
+				requestAnimationFrame(scrollAnimation);
+			}
+		}
+
+		// Easing function for smooth scrolling
+		function easeInOutQuad(t, b, c, d) {
+			t /= d / 2;
+			if (t < 1) return (c / 2) * t * t + b;
+			t--;
+			return (-c / 2) * (t * (t - 2) - 1) + b;
+		}
+
+		requestAnimationFrame(scrollAnimation);
+	}
 
 	// Add a global event listener for mousewheel to disable default scrolling
-	document.addEventListener('wheel', function (e) {
-		// Check if the mouse wheel event occurred over the timeline
-		const isTimeline = e.target.closest('#timeline');
+	document.addEventListener(
+		'wheel',
+		function (e) {
+			// Check if the photo album is displayed
+			if (photoAlbum.style.display === 'flex') return; // If photo album is displayed, do nothing
 
-		if (isTimeline) {
-			// Disable default top-to-bottom scrolling
+			// Calculate the target scroll position based on the direction of the scroll
+			const delta = e.deltaY;
+			const target = timeline.scrollLeft + delta;
+
+			// Smoothly scroll to the target position
+			smoothScrollTo(target, 65); // Adjust duration as needed
+
+			// Prevent default scrolling behavior
 			e.preventDefault();
+		},
+		{ passive: false }
+	);
 
-			// Adjust the timeline's scrollLeft property based on the direction of the scroll
-			timeline.scrollLeft += e.deltaY;
-		}
-	});
-
+	// Fetch events when the page loads
+	fetchEvents();
 	// Function to fetch events from the server
 	async function fetchEvents() {
 		const response = await fetch('http://localhost:3000/events');
@@ -133,11 +167,12 @@ document.addEventListener('DOMContentLoaded', function () {
 				visiblePhotoAlbum &&
 				window.getComputedStyle(visiblePhotoAlbum).display === 'flex'
 			) {
-				// The photo album is visible
-				// Your existing logic for handling the back button
 			}
 		}
 	});
+
+	// Disable smooth scrolling for the timeline
+	document.querySelector('.timeline').style.scrollBehavior = 'auto';
 
 	// Fetch events when the page loads
 	fetchEvents();

@@ -19,12 +19,12 @@ h1 {
     position: relative;
     justify-self: center;
     width: 100%;
-    margin-top: 0;
+    margin-top: 5px;
     margin-bottom: 100px;
     text-align: center;
-    font-weight: bold;
+    font-weight: bolder;
     color: #194f92;
-    text-shadow: 0 0 2px #b2ceff, 0 0 3px white;
+    text-shadow: 0 0 2px #cbd5f0, 0 0 3px white;
 }
 
 
@@ -116,10 +116,6 @@ h1 {
     flex-wrap: wrap ;
     justify-content: center;
     align-items: center;
-}
-
-.photo-album button {
-    border: 1px solid red;
 }
 
 .photo-album img {
