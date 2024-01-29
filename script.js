@@ -1,10 +1,84 @@
 document.addEventListener('DOMContentLoaded', function () {
-	console.log('Script is running after DOMContentLoaded.');
-
 	const timeline = document.getElementById('timeline');
 	const eventDescription = document.getElementById('event-description');
-	const photoAlbum = document.getElementById('photo-album');
-	const events = document.querySelectorAll('.timeline-event');
+	let photoAlbum; // Declare photoAlbum variable
+	let selectedEventTitle; // Variable to store the currently selected event title
+
+	// Function to fetch events from the server
+	async function fetchEvents() {
+		const response = await fetch('http://localhost:3000/events');
+		const events = await response.json();
+		renderTimeline(events);
+		// After rendering timeline, photo album is created
+		photoAlbum = document.getElementById('photo-album');
+		// Call createAddPhotoButton to append "Add Photo" button
+		createAddPhotoButton();
+	}
+
+	// Function to create and append the add photo button
+	function createAddPhotoButton() {
+		if (photoAlbum) {
+			// Create the add photo button
+			console.log('Creating Add Photo Button');
+			console.log('photoAlbum:', photoAlbum);
+			const addPhotoButton = document.createElement('button');
+			addPhotoButton.textContent = 'Add Photo';
+			addPhotoButton.id = 'add-photo-button';
+
+			// Add click event listener to the add photo button
+			addPhotoButton.addEventListener('click', function () {
+				// Trigger file picker dialog
+				const input = document.createElement('input');
+				input.type = 'file';
+				input.multiple = true;
+				input.accept = 'image/*';
+				input.onchange = handleFileSelection;
+				input.click();
+			});
+
+			// Append the button to the photo album
+			photoAlbum.appendChild(addPhotoButton);
+		}
+	}
+
+	// Function to handle file selection
+	function handleFileSelection(event) {
+		const files = event.target.files;
+		if (files.length === 0) return;
+
+		// Upload each selected file with the selected event title
+		for (const file of files) {
+			uploadFile(file, selectedEventTitle);
+		}
+	}
+
+	// Function to upload file
+	function uploadFile(file, eventTitle) {
+		// Create FormData object to send file data
+		const formData = new FormData();
+		formData.append('image', file); // Use 'image' as the key for file upload
+		formData.append('eventTitle', eventTitle); // Include the event title
+
+		// Make a POST request to your server endpoint for file upload
+		fetch('http://localhost:3000/upload', {
+			method: 'POST',
+			body: formData,
+		})
+			.then((response) => {
+				if (response.ok) {
+					return response.text(); // If successful, return response text
+				}
+				throw new Error('Network response was not ok.');
+			})
+			.then((data) => {
+				console.log('File uploaded successfully:', data); // Log the uploaded file's response
+				// Optionally, you can update the UI to indicate success
+			})
+			.catch((error) => {
+				console.error('Error uploading file:', error); // Log any errors that occurred during upload
+				// Optionally, you can update the UI to indicate failure
+			});
+	}
 
 	// Function to smoothly scroll the timeline
 	function smoothScrollTo(target, duration) {
@@ -42,7 +116,13 @@ document.addEventListener('DOMContentLoaded', function () {
 		'wheel',
 		function (e) {
 			// Check if the photo album is displayed
-			if (photoAlbum.style.display === 'flex') return; // If photo album is displayed, do nothing
+			if (photoAlbum && photoAlbum.style.display === 'flex') return; // If photo album is displayed, do nothing
+
+			// Check if vertical scrollbar is visible
+			if (timeline.scrollHeight > timeline.clientHeight) {
+				// Prevent default scrolling behavior
+				e.preventDefault();
+			}
 
 			// Calculate the target scroll position based on the direction of the scroll
 			const delta = e.deltaY;
@@ -50,21 +130,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			// Smoothly scroll to the target position
 			smoothScrollTo(target, 65); // Adjust duration as needed
-
-			// Prevent default scrolling behavior
-			e.preventDefault();
 		},
 		{ passive: false }
 	);
-
-	// Fetch events when the page loads
-	fetchEvents();
-	// Function to fetch events from the server
-	async function fetchEvents() {
-		const response = await fetch('http://localhost:3000/events');
-		const events = await response.json();
-		renderTimeline(events);
-	}
 
 	// Function to render the timeline based on events
 	function renderTimeline(events) {
@@ -107,7 +175,9 @@ document.addEventListener('DOMContentLoaded', function () {
 				showEventDescription(event);
 
 				// Show the photo album
-				photoAlbum.style.display = 'flex';
+				if (photoAlbum) {
+					photoAlbum.style.display = 'flex';
+				}
 
 				// Append the button to the visible photo album
 				const visiblePhotoAlbum = document.querySelector('.photo-album');
@@ -125,8 +195,25 @@ document.addEventListener('DOMContentLoaded', function () {
 					backButtonCopy.id = 'back-button';
 					backButtonCopy.textContent = 'Back to Timeline';
 
-					// Insert the button as the first child of the visible photo album
+					// Create a new add button
+					const addButtonCopy = document.createElement('button');
+					addButtonCopy.id = 'add-photo-button';
+					addButtonCopy.textContent = 'Add Photo';
+
+					// Add click event listener to the add photo button
+					addButtonCopy.addEventListener('click', function () {
+						// Trigger file picker dialog
+						const input = document.createElement('input');
+						input.type = 'file';
+						input.multiple = true;
+						input.accept = 'image/*';
+						input.onchange = handleFileSelection;
+						input.click();
+					});
+
+					// Insert the buttons as the first children of the visible photo album
 					visiblePhotoAlbum.insertAdjacentElement('afterbegin', backButtonCopy);
+					visiblePhotoAlbum.insertAdjacentElement('afterbegin', addButtonCopy);
 				}
 			});
 
@@ -158,8 +245,9 @@ document.addEventListener('DOMContentLoaded', function () {
 			// Show the timeline and hide the event description
 			timeline.style.display = 'flex';
 			eventDescription.style.display = 'none';
-			photoAlbum.style.display = 'none';
-			console.log('back button clicked');
+			if (photoAlbum) {
+				photoAlbum.style.display = 'none';
+			}
 
 			// Remove the back button from the visible photo album
 			const visiblePhotoAlbum = document.querySelector('.photo-album');
@@ -167,6 +255,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				visiblePhotoAlbum &&
 				window.getComputedStyle(visiblePhotoAlbum).display === 'flex'
 			) {
+				document.getElementById('back-button').remove();
 			}
 		}
 	});

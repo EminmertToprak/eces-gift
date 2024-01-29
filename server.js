@@ -5,6 +5,7 @@ const PORT = 3000;
 const path = require('path');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
+const fs = require('fs');
 
 app.use(cors());
 // Parse JSON and url-encoded form data
@@ -19,7 +20,7 @@ app.use('/uploads', express.static('uploads'));
 const events = [
 	{
 		id: 1,
-		title: 'Baby Lamb',
+		title: 'baby_lamb',
 		cover: '/uploads/covers/baby_sheep.jpg',
 		images: [
 			{ path: '/uploads/events/baby_sheep/baby_1.jpg', alt: 'Baby 1' },
@@ -31,7 +32,7 @@ const events = [
 	},
 	{
 		id: 2,
-		title: 'Child Lamb',
+		title: 'child_lamb',
 		cover: '/uploads/covers/child_sheep.jpg',
 		images: [
 			{ path: '/uploads/events/child_sheep/child_1.jpg', alt: 'Child 1' },
@@ -41,7 +42,7 @@ const events = [
 	},
 	{
 		id: 3,
-		title: 'School Lamb',
+		title: 'school_lamb',
 		cover: '/uploads/covers/teenage_sheep.jpg',
 		images: [
 			{ path: '/uploads/events/school_sheep/school_1.jpg', alt: 'School 1' },
@@ -51,7 +52,7 @@ const events = [
 	},
 	{
 		id: 4,
-		title: 'Dutch Lamb',
+		title: 'dutch_lamb',
 		cover: '/uploads/covers/dutch_sheep.jpg',
 		images: [
 			{ path: '/uploads/events/dutch_sheep/dutch_1.jpg', alt: 'Dutch 1' },
@@ -61,7 +62,7 @@ const events = [
 	},
 	{
 		id: 5,
-		title: 'Married Lamb',
+		title: 'married_lamb',
 		cover: '/uploads/covers/married_sheep.jpg',
 		images: [
 			{ path: '/uploads/events/married_sheep/married_1.jpg', alt: 'Married 1' },
@@ -81,22 +82,54 @@ app.get('/events', (req, res) => {
 });
 
 app.post('/upload', upload.single('image'), (req, res) => {
-	// Implement logic to organize the uploaded image into the correct event folder
-	// Update the events array with the new image information
-	const newImage = {
-		path: `/uploads/${req.file.filename}`,
-		alt: req.file.originalname,
-	};
+	// Get the event title from the request body
+	const eventTitle = req.body.eventTitle;
 
-	const eventId = req.body.eventId; // Assuming eventId is passed as a form field
+	// Find the event by title
+	const event = events.find((e) => e.title === eventTitle);
 
-	// Find the event by id and add the new image
-	const event = events.find((e) => e.id === Number(eventId)); // Parse eventId to Number
-	if (event) {
-		event.images.push(newImage);
+	if (!event) {
+		return res.status(404).send('Event not found');
 	}
 
-	res.send('Image uploaded successfully');
+	// Construct the directory path for the event based on its title
+	const eventDir = path.join(
+		__dirname,
+		`./uploads/events/${event.title.toLowerCase().replace(/ /g, '_')}`
+	);
+
+	// Ensure the event directory exists; if not, create it
+	if (!fs.existsSync(eventDir)) {
+		fs.mkdirSync(eventDir, { recursive: true });
+	}
+
+	// Generate a unique filename based on the original filename
+	const originalFilename = req.file.originalname;
+	const fileExtension = path.extname(originalFilename);
+	const uniqueFilename = `${Date.now()}${Math.floor(
+		Math.random() * 10000
+	)}${fileExtension}`;
+
+	// Move the uploaded image to the event directory
+	const newPath = path.join(eventDir, uniqueFilename);
+
+	// Move the file
+	fs.rename(req.file.path, newPath, (err) => {
+		if (err) {
+			console.error('Error moving file:', err);
+			return res.status(500).send('Error uploading file');
+		}
+
+		// Add the new image to the event
+		const newImage = {
+			path: newPath.replace(__dirname, ''), // Make the path relative to the server root
+			alt: originalFilename,
+		};
+		event.images.push(newImage);
+
+		// Send success response
+		res.send('Image uploaded successfully');
+	});
 });
 
 app.listen(PORT, () => {
