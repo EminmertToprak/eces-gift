@@ -46,6 +46,9 @@ document.addEventListener('DOMContentLoaded', function () {
 		const files = event.target.files;
 		if (files.length === 0) return;
 
+		// Get the title of the selected event from the data attribute
+		const selectedEventTitle = photoAlbum.getAttribute('data-event-title');
+
 		// Upload each selected file with the selected event title
 		for (const file of files) {
 			uploadFile(file, selectedEventTitle);
@@ -59,8 +62,8 @@ document.addEventListener('DOMContentLoaded', function () {
 		formData.append('image', file); // Use 'image' as the key for file upload
 		formData.append('eventTitle', eventTitle); // Include the event title
 
-		// Make a POST request to your server endpoint for file upload
-		fetch('http://localhost:3000/upload', {
+		fetch('http://localhost:3000/uploads', {
+			// Change the URL to match the server route for uploading
 			method: 'POST',
 			body: formData,
 		})
@@ -79,7 +82,6 @@ document.addEventListener('DOMContentLoaded', function () {
 				// Optionally, you can update the UI to indicate failure
 			});
 	}
-
 	// Function to smoothly scroll the timeline
 	function smoothScrollTo(target, duration) {
 		const start = timeline.scrollLeft;
@@ -177,6 +179,8 @@ document.addEventListener('DOMContentLoaded', function () {
 				// Show the photo album
 				if (photoAlbum) {
 					photoAlbum.style.display = 'flex';
+					// Set the event title as a data attribute on the photo album div
+					photoAlbum.setAttribute('data-event-title', event.title);
 				}
 
 				// Append the button to the visible photo album
