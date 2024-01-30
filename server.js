@@ -20,6 +20,7 @@ app.use('/uploaded-images', express.static('uploads')); // Change route to '/upl
 const events = [
 	{
 		id: 1,
+		displayName: 'Baby Lamb',
 		title: 'baby_lamb',
 		cover: '/uploads/covers/baby_lamb.jpg',
 		images: [
@@ -32,6 +33,7 @@ const events = [
 	},
 	{
 		id: 2,
+		displayName: 'Family & Friends With Lamb',
 		title: 'family_&_friends_lamb',
 		cover: '/uploads/covers/child_lamb.jpg',
 		images: [
@@ -48,6 +50,7 @@ const events = [
 	},
 	{
 		id: 3,
+		displayName: 'School Lamb',
 		title: 'school_lamb',
 		cover: '/uploads/covers/teenage_lamb.jpg',
 		images: [
@@ -58,6 +61,7 @@ const events = [
 	},
 	{
 		id: 4,
+		displayName: 'Dutch Lamb',
 		title: 'dutch_lamb',
 		cover: '/uploads/covers/dutch_lamb.jpg',
 		images: [
@@ -68,6 +72,7 @@ const events = [
 	},
 	{
 		id: 5,
+		displayName: 'Happily Married Lamb',
 		title: 'married_lamb',
 		cover: '/uploads/covers/married_lamb.jpg',
 		images: [

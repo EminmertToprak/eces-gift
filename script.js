@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			// Create a title element for the event
 			const titleElement = document.createElement('div');
 			titleElement.classList.add('event-title');
-			titleElement.textContent = event.title;
+			titleElement.textContent = event.displayName || event.title;
 			eventElement.appendChild(titleElement);
 
 			// Create a text element for the event (visible on hover)
