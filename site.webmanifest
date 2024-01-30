@@ -1,19 +1,27 @@
 {
-    "name": "",
-    "short_name": "",
+    "name": "Life of Ece",
+    "short_name": "loe",
+    "start_url": "/",
+    "display": "standalone",
+    "theme_color": "#cbd5f0",
+    "background_color": "#efb7ba",
     "icons": [
-        {
-            "src": "./outputDir/android-chrome-192x192.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "./outputDir/android-chrome-512x512.png",
-            "sizes": "512x512",
-            "type": "image/png"
-        }
+      {
+        "src": "./outputDir/android-chrome-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "./outputDir/android-chrome-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
     ],
-    "theme_color": "#ffffff",
-    "background_color": "#ffffff",
-    "display": "standalone"
-}
+    "related_applications": [
+      {
+        "platform": "web",
+        "url": "https://github.com/EminmertToprak/eces-gift"
+      }
+    ]
+  }
+  
