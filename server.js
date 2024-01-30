@@ -20,7 +20,7 @@ app.use('/uploaded-images', express.static('uploads')); // Change route to '/upl
 const events = [
 	{
 		id: 1,
-		title: 'Baby Lamb',
+		title: 'baby_lamb',
 		cover: '/uploads/covers/baby_lamb.jpg',
 		images: [
 			{ path: '/uploads/events/baby_lamb/baby_1.jpg', alt: 'Baby 1' },
@@ -32,17 +32,23 @@ const events = [
 	},
 	{
 		id: 2,
-		title: 'Child Lamb',
+		title: 'family_&_friends_lamb',
 		cover: '/uploads/covers/child_lamb.jpg',
 		images: [
-			{ path: '/uploads/events/child_lamb/child_1.jpg', alt: 'Child 1' },
-			{ path: '/uploads/events/child_lamb/child_2.jpg', alt: 'Child 2' },
+			{
+				path: '/uploads/events/family_&_friends_lamb/child_1.jpg',
+				alt: 'Child 1',
+			},
+			{
+				path: '/uploads/events/family_&_friends_lamb/child_2.jpg',
+				alt: 'Child 2',
+			},
 		],
 		text: `In a cradle of joy, a lamb so sweet,\nTiny hooves dancing to a playful beat.\nCurious eyes, exploring each street,\nA fluffy adventurer, in places to meet.`,
 	},
 	{
 		id: 3,
-		title: 'School Lamb',
+		title: 'school_lamb',
 		cover: '/uploads/covers/teenage_lamb.jpg',
 		images: [
 			{ path: '/uploads/events/school_lamb/school_1.jpg', alt: 'School 1' },
@@ -52,7 +58,7 @@ const events = [
 	},
 	{
 		id: 4,
-		title: 'Dutch Lamb',
+		title: 'dutch_lamb',
 		cover: '/uploads/covers/dutch_lamb.jpg',
 		images: [
 			{ path: '/uploads/events/dutch_lamb/dutch_1.jpg', alt: 'Dutch 1' },
@@ -62,7 +68,7 @@ const events = [
 	},
 	{
 		id: 5,
-		title: 'Married Lamb',
+		title: 'married_lamb',
 		cover: '/uploads/covers/married_lamb.jpg',
 		images: [
 			{ path: '/uploads/events/married_lamb/married_1.jpg', alt: 'Married 1' },
@@ -77,14 +83,45 @@ app.get('/', (req, res) => {
 	res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Route to fetch events
 app.get('/events', (req, res) => {
 	res.json(events);
 });
 
+// Route to fetch images for a specific event
+app.get('/uploads/events/:eventTitle/images', (req, res) => {
+	const eventTitle = req.params.eventTitle;
+	const eventDirectory = path.join(__dirname, 'uploads', 'events', eventTitle);
+
+	fs.readdir(eventDirectory, (err, files) => {
+		if (err) {
+			console.error('Error reading event directory:', err);
+			res.status(500).send('Error fetching images');
+		} else {
+			console.log('Files in event directory:', files); // Log filenames
+
+			const images = files.map((file) => ({
+				path: `/uploads/events/${eventTitle}/${file}`,
+				alt: file.split('.')[0], // Assuming the filename is the alt text
+			}));
+			res.json(images);
+		}
+	});
+});
+
+// Route to handle event selection
+app.get('/handle-event-selection', (req, res) => {
+	const selectedEventTitle = req.query.eventTitle;
+	// Perform actions based on the selected event title
+	// For example, you can fetch data related to the selected event from a database
+	// and send it back as a response
+	res.send(`Selected event: ${selectedEventTitle}`);
+});
+
+// Handle file uploads
 app.post('/uploads', upload.single('image'), (req, res) => {
 	// Get the event title from the request body
 	const eventTitle = req.body.eventTitle;
-	console.log(req.body);
 
 	// Find the event by title
 	const event = events.find((e) => e.title === eventTitle);
@@ -104,8 +141,13 @@ app.post('/uploads', upload.single('image'), (req, res) => {
 		fs.mkdirSync(eventDir, { recursive: true });
 	}
 
-	// Move the uploaded image to the event directory
-	const newFilePath = path.join(eventDir, req.file.originalname);
+	// Generate a unique filename for the uploaded image
+	const uniqueFilename = `${Date.now()}_${Math.floor(
+		Math.random() * 1000000
+	)}${path.extname(req.file.originalname)}`;
+
+	// Move the uploaded image to the event directory with the unique filename
+	const newFilePath = path.join(eventDir, uniqueFilename);
 
 	// Move the file
 	fs.rename(req.file.path, newFilePath, (err) => {
@@ -119,7 +161,7 @@ app.post('/uploads', upload.single('image'), (req, res) => {
 			path: path.join(
 				'/uploads/events',
 				eventTitle.toLowerCase().replace(/ /g, '_'),
-				req.file.originalname
+				uniqueFilename
 			),
 			alt: req.file.originalname,
 		};
@@ -130,6 +172,7 @@ app.post('/uploads', upload.single('image'), (req, res) => {
 	});
 });
 
+// Start the server
 app.listen(PORT, () => {
 	console.log(`Server is running on port ${PORT}`);
 });

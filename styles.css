@@ -119,7 +119,8 @@ h1 {
 }
 
 .photo-album img {
-    max-width: 100%;
+    max-width: 450px;
+    max-height: 450px;
     height: auto;
     margin: 10px; /* Add margin for spacing between images */
     border-radius: 10px;

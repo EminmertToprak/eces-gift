@@ -1,3 +1,148 @@
+// Function to render the fetched images in the photo album
+function renderPhotoAlbum(images) {
+	const photoAlbum = document.getElementById('photo-album');
+
+	// Clear existing content in the photo album
+	photoAlbum.innerHTML = '';
+
+	// Populate the photo album with images
+	images.forEach((image) => {
+		const imgElement = document.createElement('img');
+		imgElement.src = image.path;
+		imgElement.alt = image.alt;
+		photoAlbum.appendChild(imgElement);
+	});
+
+	// After rendering the images, recreate the add photo button
+	createAddPhotoButton();
+
+	// After rendering the images, create the back button
+	createBackButton(); // Add this line
+}
+
+// Function to create and append the add photo button
+function createAddPhotoButton() {
+	const photoAlbum = document.getElementById('photo-album');
+	if (photoAlbum) {
+		// Remove existing add photo button (if any)
+		const existingAddPhotoButton = document.getElementById('add-photo-button');
+		if (existingAddPhotoButton) {
+			existingAddPhotoButton.remove();
+		}
+
+		// Create the add photo button
+		const addPhotoButton = document.createElement('button');
+		addPhotoButton.textContent = 'Add Photo';
+		addPhotoButton.id = 'add-photo-button';
+
+		// Add click event listener to the add photo button
+		addPhotoButton.addEventListener('click', function () {
+			// Trigger file picker dialog
+			const input = document.createElement('input');
+			input.type = 'file';
+			input.multiple = true;
+			input.accept = 'image/*';
+			input.onchange = handleFileSelection;
+			input.click();
+		});
+
+		// Append the button to the photo album
+		photoAlbum.appendChild(addPhotoButton);
+	}
+}
+
+// Function to create and append the back button
+function createBackButton() {
+	const photoAlbum = document.getElementById('photo-album');
+	if (photoAlbum) {
+		// Remove existing back button (if any)
+		const existingBackButton = document.getElementById('back-button');
+		if (existingBackButton) {
+			existingBackButton.remove();
+		}
+
+		// Create the back button
+		const backButton = document.createElement('button');
+		backButton.textContent = 'Back to Timeline';
+		backButton.id = 'back-button';
+
+		// Add click event listener to the back button
+		backButton.addEventListener('click', function () {
+			// Show the timeline and hide the event description
+			const timeline = document.getElementById('timeline');
+			const eventDescription = document.getElementById('event-description');
+			timeline.style.display = 'flex';
+			eventDescription.style.display = 'none';
+
+			// Hide the photo album
+			photoAlbum.style.display = 'none';
+
+			// Remove the back button
+			backButton.remove();
+		});
+
+		// Append the button to the photo album
+		photoAlbum.appendChild(backButton);
+	}
+}
+
+// Function to handle event selection
+function handleEventSelection(event) {
+	const selectedEventTitle = event.title;
+	fetch(`/uploads/events/${selectedEventTitle}/images`)
+		.then((response) => response.json())
+		.then((images) => {
+			// Render the fetched images in the photo album
+			renderPhotoAlbum(images);
+
+			// After rendering the images, create the back button
+			createBackButton();
+		})
+		.catch((error) => {
+			console.error('Error fetching images:', error);
+		});
+}
+
+// Function to handle file selection
+function handleFileSelection(event) {
+	const files = event.target.files;
+	if (files.length === 0) return;
+
+	// Get the title of the selected event from the data attribute
+	const selectedEventTitle = document
+		.getElementById('photo-album')
+		.getAttribute('data-event-title');
+
+	// Upload each selected file with the selected event title
+	for (const file of files) {
+		uploadFile(file, selectedEventTitle);
+	}
+}
+
+// Function to upload file
+function uploadFile(file, eventTitle) {
+	const formData = new FormData();
+	formData.append('image', file);
+	formData.append('eventTitle', eventTitle);
+
+	fetch('http://localhost:3000/uploads', {
+		method: 'POST',
+		body: formData,
+	})
+		.then((response) => {
+			if (!response.ok) {
+				throw new Error('Failed to upload file');
+			}
+			return response.text();
+		})
+		.then((data) => {
+			console.log(data); // Log success message
+		})
+		.catch((error) => {
+			console.error('Error uploading file:', error);
+		});
+}
+
 document.addEventListener('DOMContentLoaded', function () {
 	const timeline = document.getElementById('timeline');
 	const eventDescription = document.getElementById('event-description');
@@ -19,10 +164,10 @@ document.addEventListener('DOMContentLoaded', function () {
 	function createAddPhotoButton() {
 		if (photoAlbum) {
 			// Create the add photo button
-			console.log('Creating Add Photo Button');
-			console.log('photoAlbum:', photoAlbum);
 			const addPhotoButton = document.createElement('button');
 			addPhotoButton.textContent = 'Add Photo';
+			console.log('Creating Add Photo Button');
+			console.log('photoAlbum:', photoAlbum);
 			addPhotoButton.id = 'add-photo-button';
 
 			// Add click event listener to the add photo button
@@ -55,33 +200,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 	}
 
-	// Function to upload file
-	function uploadFile(file, eventTitle) {
-		// Create FormData object to send file data
-		const formData = new FormData();
-		formData.append('image', file); // Use 'image' as the key for file upload
-		formData.append('eventTitle', eventTitle); // Include the event title
-
-		fetch('http://localhost:3000/uploads', {
-			// Change the URL to match the server route for uploading
-			method: 'POST',
-			body: formData,
-		})
-			.then((response) => {
-				if (response.ok) {
-					return response.text(); // If successful, return response text
-				}
-				throw new Error('Network response was not ok.');
-			})
-			.then((data) => {
-				console.log('File uploaded successfully:', data); // Log the uploaded file's response
-				// Optionally, you can update the UI to indicate success
-			})
-			.catch((error) => {
-				console.error('Error uploading file:', error); // Log any errors that occurred during upload
-				// Optionally, you can update the UI to indicate failure
-			});
-	}
 	// Function to smoothly scroll the timeline
 	function smoothScrollTo(target, duration) {
 		const start = timeline.scrollLeft;
@@ -174,7 +292,6 @@ document.addEventListener('DOMContentLoaded', function () {
 				// Show the timeline and hide the event description
 				timeline.style.display = 'none';
 				eventDescription.style.display = 'block';
-				showEventDescription(event);
 
 				// Show the photo album
 				if (photoAlbum) {
@@ -183,42 +300,16 @@ document.addEventListener('DOMContentLoaded', function () {
 					photoAlbum.setAttribute('data-event-title', event.title);
 				}
 
-				// Append the button to the visible photo album
-				const visiblePhotoAlbum = document.querySelector('.photo-album');
-				if (
-					visiblePhotoAlbum &&
-					window.getComputedStyle(visiblePhotoAlbum).display === 'flex'
-				) {
-					// Remove existing back buttons
-					document.querySelectorAll('#back-button').forEach((button) => {
-						button.remove();
+				// AJAX request to fetch images for the clicked event
+				fetch(`/uploads/events/${event.title}/images`)
+					.then((response) => response.json())
+					.then((images) => {
+						// Render the fetched images in the photo album
+						renderPhotoAlbum(images);
+					})
+					.catch((error) => {
+						console.error('Error fetching images:', error);
 					});
-
-					// Create a new back button
-					const backButtonCopy = document.createElement('button');
-					backButtonCopy.id = 'back-button';
-					backButtonCopy.textContent = 'Back to Timeline';
-
-					// Create a new add button
-					const addButtonCopy = document.createElement('button');
-					addButtonCopy.id = 'add-photo-button';
-					addButtonCopy.textContent = 'Add Photo';
-
-					// Add click event listener to the add photo button
-					addButtonCopy.addEventListener('click', function () {
-						// Trigger file picker dialog
-						const input = document.createElement('input');
-						input.type = 'file';
-						input.multiple = true;
-						input.accept = 'image/*';
-						input.onchange = handleFileSelection;
-						input.click();
-					});
-
-					// Insert the buttons as the first children of the visible photo album
-					visiblePhotoAlbum.insertAdjacentElement('afterbegin', backButtonCopy);
-					visiblePhotoAlbum.insertAdjacentElement('afterbegin', addButtonCopy);
-				}
 			});
 
 			// Append the event to the timeline
@@ -226,23 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 	}
 
-	// Function to show event description
-	function showEventDescription(event) {
-		const photoAlbum = document.getElementById('photo-album');
-
-		// Clear existing content in the photo album
-		photoAlbum.innerHTML = '';
-
-		// Populate the photo album with images from the selected event
-		event.images.forEach((image) => {
-			const imgElement = document.createElement('img');
-			imgElement.src = image.path;
-			imgElement.alt = image.alt;
-			photoAlbum.appendChild(imgElement);
-		});
-	}
-
-	// Add an event listener for clicks on the document
+	// Function to handle clicks on the document
 	document.addEventListener('click', function (e) {
 		if (e.target.matches('#back-button')) {
 			// Handle the click event for the back button
@@ -255,11 +330,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			// Remove the back button from the visible photo album
 			const visiblePhotoAlbum = document.querySelector('.photo-album');
-			if (
-				visiblePhotoAlbum &&
-				window.getComputedStyle(visiblePhotoAlbum).display === 'flex'
-			) {
-				document.getElementById('back-button').remove();
+			const backButton = document.getElementById('back-button');
+			if (backButton && visiblePhotoAlbum.contains(backButton)) {
+				backButton.remove();
 			}
 		}
 	});
@@ -270,3 +343,43 @@ document.addEventListener('DOMContentLoaded', function () {
 	// Fetch events when the page loads
 	fetchEvents();
 });
+
+// Function to upload file
+function uploadFile(file, eventTitle) {
+	const formData = new FormData();
+	formData.append('image', file);
+	formData.append('eventTitle', eventTitle);
+
+	fetch('http://localhost:3000/uploads', {
+		method: 'POST',
+		body: formData,
+	})
+		.then((response) => {
+			if (!response.ok) {
+				throw new Error('Failed to upload file');
+			}
+			return response.text();
+		})
+		.then((data) => {
+			console.log(data); // Log success message
+		})
+		.catch((error) => {
+			console.error('Error uploading file:', error);
+		});
+}
+
+// Function to show event description
+function showEventDescription(event) {
+	const photoAlbum = document.getElementById('photo-album');
+
+	// Clear existing content in the photo album
+	photoAlbum.innerHTML = '';
+
+	// Populate the photo album with images from the selected event
+	event.images.forEach((image) => {
+		const imgElement = document.createElement('img');
+		imgElement.src = image.path;
+		imgElement.alt = image.alt;
+		photoAlbum.appendChild(imgElement);
+	});
+}
