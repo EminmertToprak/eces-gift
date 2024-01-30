@@ -89,7 +89,7 @@ function createBackButton() {
 // Function to handle event selection
 function handleEventSelection(event) {
 	const selectedEventTitle = event.title;
-	fetch(`/uploads/events/${selectedEventTitle}/images`)
+	fetch(`uploads/events/${selectedEventTitle}/images`)
 		.then((response) => response.json())
 		.then((images) => {
 			// Render the fetched images in the photo album
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			eventElement.classList.add('timeline-event');
 
 			// Check if the event has a cover image before accessing it
-			const coverImagePath = event.cover || '/uploads/covers/default_cover.jpg';
+			const coverImagePath = event.cover || 'uploads/covers/default_cover.jpg';
 
 			// Create an img element for the event cover
 			const imgElement = document.createElement('img');
@@ -301,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				}
 
 				// AJAX request to fetch images for the clicked event
-				fetch(`/uploads/events/${event.title}/images`)
+				fetch(`uploads/events/${event.title}/images`)
 					.then((response) => response.json())
 					.then((images) => {
 						// Render the fetched images in the photo album
